@@ -6,16 +6,18 @@ import gamesData from '@/app/data/games.json'; // Adjust the path if needed
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Define the Card interface
 interface Card {
   sn: number;
   title: string;
   img: string;
   description: string;
   keywords: string[];
-  link: string; // Assuming this is the base URL (game.c)
-  short: string; // Add this line
+  link: string;
+  short: string;
   view: number;
-  isAi: boolean; // Ensure this property exists in your Card interface
+  isAi: boolean;
+  src: string;
 }
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -36,9 +38,15 @@ const CardsList: React.FC = () => {
 
   const cardsPerPage = 20;
 
-  // Initially set shuffled cards
+  // Initially set shuffled cards with default values for missing fields
   useEffect(() => {
-    const shuffledData = shuffleArray(gamesData);
+    const shuffledData = shuffleArray(gamesData as Card[]).map(card => ({
+      ...card,
+      short: card.short || 'defaultShort',  // Provide default for 'short'
+      isAi: card.isAi ?? false,             // Provide default for 'isAi'
+      src: card.src || 'defaultSrc',        // Provide default for 'src'
+    }));
+
     setVisibleCards(shuffledData.slice(0, cardsPerPage));
     setPage(1);
   }, []);
@@ -50,7 +58,13 @@ const CardsList: React.FC = () => {
       const end = start + cardsPerPage;
 
       setTimeout(() => {
-        const shuffledData = shuffleArray(gamesData);
+        const shuffledData = shuffleArray(gamesData as Card[]).map(card => ({
+          ...card,
+          short: card.short || 'defaultShort',  // Provide default for 'short'
+          isAi: card.isAi ?? false,             // Provide default for 'isAi'
+          src: card.src || 'defaultSrc',        // Provide default for 'src'
+        }));
+
         setVisibleCards((prevCards) => [
           ...prevCards,
           ...shuffledData.slice(start, end),
@@ -118,7 +132,7 @@ const CardsList: React.FC = () => {
       {visibleCards.map((card) => (
         <Link
           key={card.sn}
-          href={`${card.link}?src=${card.short}`} // Adjusted href here
+          href={`${card.link}?src=${card.short}`} // Adjusted href to include 'src'
           className="card-div-comp"
           onClick={() => handleCardClick(card.sn)}
         >
